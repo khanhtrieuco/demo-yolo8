@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  yolo-app:
+    build: .
+    image: demo-yolo8
+    container_name: yolo_app
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8000"
+    command: python app.py
+    # restart: unless-stopped
