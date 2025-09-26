@@ -1,27 +1,6 @@
 version: "3.9"
 
 services:
-  traefik:
-    image: traefik:v2.11
-    container_name: traefik
-    restart: always
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=han.tran@eggstech.io"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
-    networks:
-      - traefik
 
   yolo-app:
     build: .
@@ -38,13 +17,7 @@ services:
       - "traefik.http.routers.yolo-app.tls=true"
       - "traefik.http.routers.yolo-app.tls.certresolver=myresolver"
       - "traefik.http.services.yolo-app.loadbalancer.server.port=8000"
-    depends_on:
-      - traefik
-    networks:
-      - traefik
     command: python app.py
-    # restart: unless-stopped
+    restart: unless-stopped
 
-networks:
-  traefik:
-    driver: bridge
+
