@@ -1,38 +1,39 @@
 services:
-  traefik:
-    image: traefik:v2.11
-    container_name: traefik
+  db:
+    image: postgres:17
+    container_name: postgres_docker
     restart: always
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=han.tran@eggstech.io"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
-
-  yolo-app:
-    build: .
-    image: demo-yolo8
-    container_name: yolo_app
-    volumes:
-      - .:/app
     environment:
-      - PORT=8000
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.yolo-app.rule=Host(`ip.aeon.metatek.okayla.vn`)"
-      - "traefik.http.routers.yolo-app.entrypoints=websecure"
-      - "traefik.http.routers.yolo-app.tls=true"
-      - "traefik.http.routers.yolo-app.tls.certresolver=myresolver"
-      - "traefik.http.services.yolo-app.loadbalancer.server.port=8000"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: shelves_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init_db:/docker-entrypoint-initdb.d  # folder chứa các script SQL
+
+  app:
+    build: .
+    image: flask_vertex_app
+    container_name: flask_vertex_container
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: shelves_db
+      GOOGLE_APPLICATION_CREDENTIALS: /app/gcv_key.json
     command: python app.py
     restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+      - ./gcv_key.json:/app/gcv_key.json:ro
+
+volumes:
+  db_data:

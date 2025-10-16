@@ -1,19 +1,24 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
-# Cài gói hệ thống cần cho OpenCV
-RUN apt-get update && apt-get install -y \
+# Thiết mục thư mục làm việc
+WORKDIR /app
+
+# Cài đặt các công cụ cơ bản và lib cần thiết cho psycopg2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
     libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+# Copy toàn bộ mã nguồn vào container
 COPY . .
 
-EXPOSE 8000
-ENV PORT=8000
+# Cài đặt các thư viện Python từ requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
+ENV PORT=5000
+EXPOSE 5000
+
+# Chạy ứng dụng Flask
 CMD ["python", "app.py"]
