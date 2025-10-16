@@ -3,4 +3,7 @@ numpy
 flask
 psycopg2-binary
 vertexai
+google-generativeai
+Pillow
+python-dotenv
 gunicorn

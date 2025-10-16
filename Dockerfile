@@ -17,8 +17,8 @@ COPY . .
 # Cài đặt các thư viện Python từ requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PORT=5000
-EXPOSE 5000
+ENV PORT=6000
+EXPOSE 6000
 
 # Chạy ứng dụng Flask
 CMD ["python", "app.py"]

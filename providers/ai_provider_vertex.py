@@ -1,12 +1,18 @@
 from providers.vertex_utils import GCVVertexService
+import os
 
 class AIProviderVertex:
-    def __init__(self, threshold=70.0):
+    def __init__(self, threshold=70.0, api_key=None):
+        # Lấy API key từ environment nếu không được truyền vào
+        if not api_key:
+            api_key = os.environ.get('GOOGLE_API_KEY')
+            
         self.service = GCVVertexService(
             project_id="igneous-gamma-474704-r1",
             location="us-central1",
             model_name="gemini-2.5-flash",
-            threshold=threshold
+            threshold=threshold,
+            api_key=api_key
         )
 
     def analyze(self, ref_path: str, test_path: str, description: str = "") -> dict:

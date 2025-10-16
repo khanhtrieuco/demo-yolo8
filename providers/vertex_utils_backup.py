@@ -2,12 +2,7 @@ import os
 import re
 import mimetypes
 import requests
-try:
-    import google.generativeai as genai
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
-    
+import google.generativeai as genai
 from vertexai import init
 from vertexai.preview.generative_models import GenerativeModel, Part
 from google.oauth2 import service_account
@@ -40,11 +35,11 @@ class GCVVertexService:
         self.api_key = api_key
         self.use_genai = False
         
-        # Nếu có API key và thư viện genai có sẵn, ưu tiên sử dụng google-generativeai
-        if api_key and GENAI_AVAILABLE:
+        # Nếu có API key, ưu tiên sử dụng google-generativeai
+        if api_key:
             try:
                 genai.configure(api_key=api_key)
-                self.genai_model = genai.GenerativeModel('gemini-2.5-flash')
+                self.genai_model = genai.GenerativeModel('gemini-1.5-flash')
                 self.use_genai = True
                 print(f"✅ Using Google GenerativeAI with API key")
             except Exception as e:
@@ -62,15 +57,12 @@ class GCVVertexService:
             except Exception as e:
                 print(f"❌ Error initializing Vertex AI: {e}")
                 # Fallback to default initialization
-                try:
-                    init(project=self.project_id, location=self.location)
-                    self.model = GenerativeModel(self.model_name)
-                except Exception as e2:
-                    raise Exception(f"Cannot initialize both GenerativeAI and VertexAI. GenAI error: {e if GENAI_AVAILABLE else 'Not available'}. VertexAI error: {e2}")
+                init(project=self.project_id, location=self.location)
+                self.model = GenerativeModel(self.model_name)
 
     # --- Helper ---
     def _load_image_part(self, path_or_url: str):
-        """Load ảnh từ file hoặc URL thành Part object."""
+        """Load ảnh từ file hoặc URL thành Part object cho VertexAI."""
         if path_or_url.startswith(("http://", "https://")):
             try:
                 response = requests.get(path_or_url, timeout=30)
@@ -87,15 +79,12 @@ class GCVVertexService:
         if not data:
             raise ValueError(f"Dữ liệu ảnh rỗng: {path_or_url}")
 
-        if self.use_genai and GENAI_AVAILABLE:
+        if self.use_genai:
             # For google-generativeai
-            try:
-                import PIL.Image
-                import io
-                image = PIL.Image.open(io.BytesIO(data))
-                return image
-            except ImportError:
-                raise ValueError("PIL library required for GenerativeAI image processing")
+            import PIL.Image
+            import io
+            image = PIL.Image.open(io.BytesIO(data))
+            return image
         else:
             # For vertex AI
             return Part.from_data(data=data, mime_type=mime)
