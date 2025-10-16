@@ -1,6 +1,6 @@
-ultralytics
-opencv-python
-pillow
 requests
 numpy
 flask
+psycopg2-binary
+vertexai
+gunicorn
