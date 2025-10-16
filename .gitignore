@@ -5,3 +5,4 @@ outputs/
 output.jpg
 gcv_key.json
 .env
+letsencrypt/
