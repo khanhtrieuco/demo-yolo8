@@ -43,12 +43,12 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: shelves_db
-      PORT: 6000
+      PORT: 5999
       GOOGLE_APPLICATION_CREDENTIALS: /app/gcv_key.json
     command: python app.py
     restart: unless-stopped
     ports:
-      - "6000:6000"
+      - "5999:5999"
     volumes:
       - .:/app
       - ./uploads:/app/uploads
@@ -59,6 +59,6 @@ services:
       - "traefik.http.routers.yolo-app.entrypoints=websecure"
       - "traefik.http.routers.yolo-app.tls=true"
       - "traefik.http.routers.yolo-app.tls.certresolver=myresolver"
-      - "traefik.http.services.yolo-app.loadbalancer.server.port=6000"
+      - "traefik.http.services.yolo-app.loadbalancer.server.port=5999"
 volumes:
   db_data:

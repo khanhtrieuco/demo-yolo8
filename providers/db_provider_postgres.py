@@ -8,8 +8,8 @@ class DBProvider:
         self.db_host = os.getenv("DB_HOST", "localhost")
         self.db_name = os.getenv("DB_NAME", "shelves_db")
         self.db_user = os.getenv("DB_USER", "postgres")
-        self.db_password = os.getenv("DB_PASSWORD", "123456")
-        self.db_port = os.getenv("DB_PORT", "5433")
+        self.db_password = os.getenv("DB_PASSWORD", "Admin@123")
+        self.db_port = os.getenv("DB_PORT", "5432")
 
     # Kết nối Postgres 
     def get_connection(self):
@@ -20,8 +20,6 @@ class DBProvider:
             password=self.db_password,
             port=self.db_port
         )
-        
-        
     # Lấy ảnh mẫu theo code
     def get_reference_image_by_code(self, code: str):
         conn = self.get_connection()
@@ -80,3 +78,15 @@ class DBProvider:
         cur.close()
         conn.close()
         return refs
+    
+    def get_check_result(self, ref_id):
+        conn = self.get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(
+            "SELECT * FROM check_results WHERE reference_id = %s ORDER BY checked_at DESC",
+            (ref_id,)
+        )
+        check_history = cur.fetchall()
+        cur.close()
+        conn.close()
+        return check_history
